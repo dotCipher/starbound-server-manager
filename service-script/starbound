@@ -13,7 +13,7 @@ DESC="Starbound Server Daemon"
 NAME=starbound
 DIR=/home/starbound/Steam/steamapps/common/Starbound/linux64
 DAEMON=$DIR/starbound_server
-PIDFILE=/var/run/$NAME.pid
+PIDFILE=/home/starbound/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
 USER=starbound
@@ -23,8 +23,8 @@ DAEMON_ARGS=""
 STEAM_CMD_DIR=/home/starbound/SteamCMD
 STEAM_CMD_DAEMON=$STEAM_DIR/steamcmd.sh
 
-STEAM_USER=anonymous
-STEAM_PASS=
+STEAM_USER=YOUR_STEAM_USERNAME
+STEAM_PASS=YOUR_STEAM_PASSWORD
 STEAM_APP=211820
 
 [ -x "$DAEMON" ] || exit 0
@@ -67,6 +67,19 @@ do_stop() {
         log_failure_msg "$DESC '$NAME' is not running."
         return 1
     fi
+}
+
+do_update() {
+    su - $USER -c "$STEAM_DAEMON +login $STEAM_USER $STEAM_PASS +app_update $STEAM_APP +quit"
+}
+
+do_backup() {
+    TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+    BACKUP_FILE="$BACKUP_DIR/${TIMESTAMP}.tar.gz"
+    mkdir -p ${BACKUP_DIR}
+    tar zvcf $BACKUP_FILE $DIR
+    log_action_msg "Backed up $DIR"
+    log_action_msg "to archive: $BACKUP_FILE"
 }
 
 case "$1" in
@@ -124,7 +137,10 @@ case "$1" in
         fi
     ;;
     update)
-        su - $USER -c "$STEAM_DAEMON +login $STEAM_USER $STEAM_PASS +app_update $STEAM_APP +quit"
+        do_update
+        ;;
+    backup)
+        do_backup
         ;;
     *)
         log_action_msg "Usage: $SCRIPTNAME {start|stop|restart|status|update}"
