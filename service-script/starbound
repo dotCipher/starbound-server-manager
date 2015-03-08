@@ -143,7 +143,7 @@ case "$1" in
         do_backup
         ;;
     *)
-        log_action_msg "Usage: $SCRIPTNAME {start|stop|restart|status|update}"
+        log_action_msg "Usage: $SCRIPTNAME {start|stop|restart|status|update|backup}"
         exit 0
     ;;
 esac
